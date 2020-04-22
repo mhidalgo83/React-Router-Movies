@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-
-import SavedList from './Movies/SavedList';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Movie, MovieList, SavedList } from "./Movies";
 
 const App = () => {
   const [savedList, setSavedList] = useState([]);
@@ -10,25 +10,36 @@ const App = () => {
   useEffect(() => {
     const getMovies = () => {
       axios
-        .get('http://localhost:5000/api/movies')
-        .then(response => {
+        .get("http://localhost:5000/api/movies")
+        .then((response) => {
           setMovieList(response.data);
         })
-        .catch(error => {
-          console.error('Server Error', error);
+        .catch((error) => {
+          console.error("Server Error", error);
         });
-    }
+    };
     getMovies();
   }, []);
 
-  const addToSavedList = movie => {
+  const addToSavedList = (movie) => {
     setSavedList([...savedList, movie]);
   };
 
   return (
     <div>
-      <SavedList list={savedList} />
-      <div>Replace this Div with your Routes</div>
+      <Router>
+        <SavedList list={savedList} />
+        <Switch>
+          <Route exact path="/" component={MovieList} />
+          <Route
+            path="/movie/:id"
+            render={(props) => {
+              const { id } = props.match.params;
+              return <Movie key={id} id={id} addToSavedList={addToSavedList} />;
+            }}
+          />
+        </Switch>
+      </Router>
     </div>
   );
 };
